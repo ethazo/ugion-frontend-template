@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",          // ESLint 核心插件
+    "esbenp.prettier-vscode",         // Prettier 格式化
+    "bradlc.vscode-tailwindcss",       // Tailwind CSS 智能提示
+    "tstack.vscode-tanstack-router",   // TanStack Router 辅助
+    "tstack.vscode-tanstack-query",    // TanStack Query 辅助
+    "christian-kohler.path-intellisense" // 路径补全
+  ]
+}
