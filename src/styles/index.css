@@ -1,14 +1,2 @@
-/* Tailwind v4 */
-@import "tailwindcss";
-
-/* 主题变量 */
-@import "./theme.css";
-
-/* 滚动条 */
-@import "./scrollbar.css";
-
-html,
-body,
-#root {
-  height: 100%;
-}
+@import 'tailwindcss';
+@import '@heroui/styles';
