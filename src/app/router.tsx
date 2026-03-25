@@ -1,11 +1,16 @@
 import { createRouter } from "@tanstack/react-router";
+
+import { queryClient } from "@/lib/query-client";
+
 // Generated Routes
 import { routeTree } from "../routeTree.gen";
 
 // Create a new router instance
 export const router = createRouter({
   routeTree,
-  context: {},
+  context: {
+    queryClient
+  },
   defaultPreload: 'intent',
   defaultPreloadStaleTime: 0,
 })

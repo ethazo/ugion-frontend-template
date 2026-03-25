@@ -11,8 +11,6 @@
     "prepare": "husky"
   },
   "dependencies": {
-    "@heroui/react": "^3.0.0-beta.8",
-    "@heroui/styles": "^3.0.0-beta.8",
     "@hookform/resolvers": "^5.2.2",
     "@tailwindcss/vite": "^4.2.1",
     "@tanstack/react-query": "^5.90.21",
