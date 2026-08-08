@@ -4,23 +4,24 @@
 
 ## 选型一览
 
-| 层 | 选择 | 一句话理由 |
-| --- | --- | --- |
-| 框架 | React + TypeScript(strict) | 生态最大,单人维护多项目时查资料成本最低 |
-| 构建 | Vite | 开发反馈快,产物可配置子路径 |
-| 包管理 | pnpm | 严格依赖隔离,避免幽灵依赖在克隆后才暴露 |
-| 路由 | TanStack Router | 类型推导贯通参数与 loader,`beforeLoad` 适合做角色校验 |
-| 样式 | Tailwind CSS v4 | 零运行时,token 以 `@theme` 写在 CSS 里,即原生 CSS 变量 |
-| 组件库 | shadcn/ui(Base UI 基座) | 源码进仓库、可随意改,不受上游版本与设计语言约束 |
-| 表格 | TanStack Table | headless,外观自己定,不带管理系统预设 |
-| 图标 | lucide-react | shadcn 默认配套,本地打包不碰 CDN |
-| 服务端状态 | TanStack Query | 缓存、失效、重试是这类应用的真实问题 |
-| 客户端状态 | Zustand(仅用于外壳级 UI 状态) | 主题、侧栏这类状态不值得上重型方案 |
-| 数据校验 | Zod | 在接口边界做运行时校验,类型才不是自我安慰 |
-| 表单 | React Hook Form + Zod resolver | 生态成熟、资料多,无测试兜底时容错更高 |
-| 日期 | date-fns v4 | react-day-picker 已依赖它,避免仓库里躺两个日期库 |
-| 工程约束 | ESLint(flat config) + Prettier | 约定靠工具强制,写在文档里没人遵守 |
-| 提交钩子 | simple-git-hooks + lint-staged | 单人项目够用,比 husky 少一层目录和安装脚本 |
+| 层          | 选择                           | 一句话理由                                             |
+| ----------- | ------------------------------ | ------------------------------------------------------ |
+| 框架        | React + TypeScript(strict)     | 生态最大,单人维护多项目时查资料成本最低                |
+| 构建        | Vite                           | 开发反馈快,产物可配置子路径                            |
+| 包管理      | pnpm                           | 严格依赖隔离,避免幽灵依赖在克隆后才暴露                |
+| 路由        | TanStack Router                | 类型推导贯通参数与 loader,`beforeLoad` 适合做角色校验  |
+| 样式        | Tailwind CSS v4                | 零运行时,token 以 `@theme` 写在 CSS 里,即原生 CSS 变量 |
+| 组件库      | shadcn/ui(Base UI 基座)        | 源码进仓库、可随意改,不受上游版本与设计语言约束        |
+| 表格        | TanStack Table                 | headless,外观自己定,不带管理系统预设                   |
+| 图标        | lucide-react                   | shadcn 默认配套,本地打包不碰 CDN                       |
+| 服务端状态  | TanStack Query                 | 缓存、失效、重试是这类应用的真实问题                   |
+| HTTP 客户端 | axios                          | 拦截器适合放 401 收口,上传进度可用,不必自己包一层 XHR  |
+| 客户端状态  | Zustand(仅用于外壳级 UI 状态)  | 主题、侧栏这类状态不值得上重型方案                     |
+| 数据校验    | Zod                            | 在接口边界做运行时校验,类型才不是自我安慰              |
+| 表单        | React Hook Form + Zod resolver | 生态成熟、资料多,无测试兜底时容错更高                  |
+| 日期        | date-fns v4                    | react-day-picker 已依赖它,避免仓库里躺两个日期库       |
+| 工程约束    | ESLint(flat config) + Prettier | 约定靠工具强制,写在文档里没人遵守                      |
+| 提交钩子    | simple-git-hooks + lint-staged | 单人项目够用,比 husky 少一层目录和安装脚本             |
 
 ## 几个值得单独说明的决定
 

@@ -4,22 +4,24 @@
 
 ## 后端基础信息
 
-| 项 | 值 |
-| --- | --- |
-| 接口前缀 | `/api` |
-| 开发环境后端 | `http://main.uniplt.tclocal.ugion.com` |
-| 认证方式 | httpOnly cookie,前端不持有也不读取凭证 |
-| 响应包装 | `{ code, message, data, success }` |
-| 角色取值 | `ADMIN` / `TEACHER` / `STUDENT`(单角色,大写字符串) |
+| 项           | 值                                                 |
+| ------------ | -------------------------------------------------- |
+| 接口前缀     | `/api`                                             |
+| 开发环境后端 | `http://main.uniplt.tclocal.ugion.com`             |
+| 认证方式     | httpOnly cookie,前端不持有也不读取凭证             |
+| 响应包装     | `{ code, message, data, success }`                 |
+| 角色取值     | `ADMIN` / `TEACHER` / `STUDENT`(单角色,大写字符串) |
 
 ## 请求层
 
-统一封装在 `shared/api/`,业务代码不直接调 `fetch`。
+HTTP 客户端用 axios,统一封装在 `shared/api/`。业务代码不直接调 axios,也不用 `fetch`。
+
+选 axios 而不是 `fetch` 的原因:401 收口写成响应拦截器就够,不必让每个调用点都记得判断;上传进度 `fetch` 拿不到,自己包一层 XHR 只是重写一遍 axios。
 
 封装承担五件事:
 
 1. 拼接 `/api` 前缀(生产同域,相对路径,支持子路径部署)
-2. 带上凭证 —— 所有请求 `credentials: 'include'`
+2. 带上凭证 —— 实例配 `withCredentials: true`
 3. 解开响应包装 —— 校验 `success`,把 `data` 交给上层
 4. 统一错误转换 —— 转成三类错误对象
 5. 401 拦截 —— 清理用户状态并跳登录页,不向上抛给业务代码
@@ -38,11 +40,11 @@
 
 请求层把所有失败归为三类,业务代码只需区分这三类:
 
-| 类型 | 触发 | 处理 | 重试 |
-| --- | --- | --- | --- |
-| 认证失效 | HTTP 401 | 请求层内部处理,跳登录,不抛给业务 | 否 |
-| 业务错误 | HTTP 200 但 `success: false` | 抛出错误,用 `message` 作为展示文案 | 否 |
-| 系统错误 | 其余所有情况 | 抛出通用消息,提供重试 | 5xx 与网络类重试 1 次,其余不重试 |
+| 类型     | 触发                         | 处理                               | 重试                             |
+| -------- | ---------------------------- | ---------------------------------- | -------------------------------- |
+| 认证失效 | HTTP 401                     | 请求层内部处理,跳登录,不抛给业务   | 否                               |
+| 业务错误 | HTTP 200 但 `success: false` | 抛出错误,用 `message` 作为展示文案 | 否                               |
+| 系统错误 | 其余所有情况                 | 抛出通用消息,提供重试              | 5xx 与网络类重试 1 次,其余不重试 |
 
 第三类是兜底,涵盖 5xx、网络中断、超时、Zod 校验失败,以及 **401 之外的 4xx**(403、404、以及后端偶发返回的非包装响应)。这类响应没有可信的 `message`,统一按系统错误处理——不要因为表里没单独列出 403 就让它掉进未处理分支。
 
@@ -62,13 +64,13 @@
 
 ### 类型命名
 
-| 规则 | 说明 |
-| --- | --- |
-| 领域类型用领域名词 | `CurrentUser`,不是 `SimpleUserInfo` |
-| 不用传输层后缀 | 禁止 `Result` / `VO` / `DTO` / `Response` / `Entity` |
-| 请求入参用 `Input` 后缀 | `PasswordLoginInput`、`SendCodeInput` |
-| 不用 `Simple` / `Basic` 这类模糊限定词 | 确实存在两种粒度时用 `XxxSummary` 与 `Xxx` |
-| 包装层只有一个泛型类型 | `ApiEnvelope<T>`,只在请求层出现,业务代码不引用 |
+| 规则                                   | 说明                                                 |
+| -------------------------------------- | ---------------------------------------------------- |
+| 领域类型用领域名词                     | `CurrentUser`,不是 `SimpleUserInfo`                  |
+| 不用传输层后缀                         | 禁止 `Result` / `VO` / `DTO` / `Response` / `Entity` |
+| 请求入参用 `Input` 后缀                | `PasswordLoginInput`、`SendCodeInput`                |
+| 不用 `Simple` / `Basic` 这类模糊限定词 | 确实存在两种粒度时用 `XxxSummary` 与 `Xxx`           |
+| 包装层只有一个泛型类型                 | `ApiEnvelope<T>`,只在请求层出现,业务代码不引用       |
 
 ### 函数命名
 
@@ -82,17 +84,17 @@ requestSmsCode()        不是 postSendCode()
 logout()
 ```
 
-读取用 `fetch`,写入用动词原形。函数名里不出现 HTTP 方法。
+读取用 `fetch` 前缀,写入用动词原形。函数名里不出现 HTTP 方法。这里的 `fetch` 是命名约定,和 HTTP 客户端选型无关。
 
 ### 字段命名
 
 多数字段直接沿用后端的 camelCase 名字。**只在后端名字有误导性时重命名**,并且必须在 schema 的转换里完成:
 
-| 后端 | 前端 | 理由 |
-| --- | --- | --- |
-| `avatar`(fileId) | `avatarFileId` | 原名暗示是图片地址,实际是 ID,极易误用 |
-| `realName` | `fullName` | 与 `username` 的区别更清楚 |
-| `role`: `ADMIN` | `role`: `admin` | 见下 |
+| 后端             | 前端            | 理由                                  |
+| ---------------- | --------------- | ------------------------------------- |
+| `avatar`(fileId) | `avatarFileId`  | 原名暗示是图片地址,实际是 ID,极易误用 |
+| `realName`       | `fullName`      | 与 `username` 的区别更清楚            |
+| `role`: `ADMIN`  | `role`: `admin` | 见下                                  |
 
 不为了风格统一而重命名。改一个字段名的代价是排查问题时没法在前后端之间直接搜同一个词,只有当原名会导致误用时才值得付这个代价。
 
@@ -138,9 +140,13 @@ schema 定义在 feature 的 `api.ts` 里,类型用 `z.infer` 从 schema 推导,
 按 feature 分组,层级从粗到细:
 
 ```ts
-['courses']                    // 该 feature 全部
-['courses', 'list', filters]   // 列表 + 筛选条件
-['courses', 'detail', id]      // 单条
+;[
+  'courses',
+] // 该 feature 全部
+[
+  ('courses', 'list', filters)
+] // 列表 + 筛选条件
+[('courses', 'detail', id)] // 单条
 ```
 
 每个 feature 在 `api.ts` 里导出自己的 key 工厂函数,不在组件里手拼数组字符串。
@@ -178,13 +184,13 @@ schema 定义在 feature 的 `api.ts` 里,类型用 `z.infer` 从 schema 推导,
 
 ### 认证接口
 
-| 接口 | 方法 | 入参 | 返回 `data` |
-| --- | --- | --- | --- |
-| `/api/auth/login` | POST | `username`, `password` | LoginResult |
-| `/api/auth/sms-login` | POST | `phone`, `code`, `sendToken?` | LoginResult |
+| 接口                  | 方法 | 入参                                     | 返回 `data`     |
+| --------------------- | ---- | ---------------------------------------- | --------------- |
+| `/api/auth/login`     | POST | `username`, `password`                   | LoginResult     |
+| `/api/auth/sms-login` | POST | `phone`, `code`, `sendToken?`            | LoginResult     |
 | `/api/auth/send-code` | POST | `phone`, `scene`(`LOGIN` / `BIND_PHONE`) | `{ sendToken }` |
-| `/api/auth/logout` | POST | 无 | 无 |
-| `/api/auth/me` | GET | 无 | SimpleUserInfo |
+| `/api/auth/logout`    | POST | 无                                       | 无              |
+| `/api/auth/me`        | GET  | 无                                       | SimpleUserInfo  |
 
 上表右列是后端的类型名,仅用于对照文档。前端对应的领域类型:
 

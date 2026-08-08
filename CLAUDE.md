@@ -19,7 +19,7 @@ pnpm format       Prettier
 
 ## 技术栈
 
-React + TS(strict) / Vite / pnpm / TanStack Router(文件式) / Tailwind v4 / shadcn-ui(Base UI 基座) / TanStack Table / TanStack Query / Zustand / Zod / React Hook Form + zodResolver / date-fns v4 / lucide-react
+React + TS(strict) / Vite / pnpm / TanStack Router(文件式) / Tailwind v4 / shadcn-ui(Base UI 基座) / TanStack Table / TanStack Query / axios / Zustand / Zod / React Hook Form + zodResolver / date-fns v4 / lucide-react
 
 不引入表格、表单、UI 库的替代品。加任何依赖前先问。
 
@@ -76,6 +76,8 @@ styles/     全局样式与 token
 
 请求层统一处理:401 拦截跳登录、错误归三类(认证失效 / 业务错误 / 系统错误)。组件不写 `try/catch` 包请求,通过 Query 的 `error` 状态处理。
 
+**HTTP 客户端用 axios,不用 `fetch`。** 业务代码也不直接调 axios,只走 `shared/api/` 导出的 `request` 与 `uploadFile`。
+
 每个数据区域都要有 loading 与 error 态,不允许静默失败。用 `shared/ui/` 里的骨架屏、空态、错误态组件,不各自发挥。
 
 ## 注释
@@ -94,7 +96,9 @@ styles/     全局样式与 token
 
 ## 状态
 
-项目尚未初始化,`package.json` 与源码都还不存在。上面的命令是规划中的,首次搭建脚手架时按此配置。
+脚手架与外壳层已就绪:请求层、角色分发、两种布局、主题、认证 feature、三个角色的路由骨架都能跑通。上面的命令全部可用。
+
+各角色页面目前是占位内容,等下游项目按 `docs/08-template-usage.md` 填充。
 
 ## 后端对接
 

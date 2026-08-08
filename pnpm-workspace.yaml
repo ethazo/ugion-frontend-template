@@ -1,0 +1,4 @@
+# simple-git-hooks 的 postinstall 不放行:根 package.json 的 prepare 脚本会显式注册钩子,
+# 让依赖自己跑安装脚本没有必要。
+allowBuilds:
+  simple-git-hooks: false

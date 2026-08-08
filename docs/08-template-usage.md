@@ -60,16 +60,16 @@ git cherry-pick <commit>           # 只挑需要的
 
 ## 文档索引
 
-| 文档 | 内容 |
-| --- | --- |
-| `00-overview.md` | 定位、边界、不负责什么 |
-| `01-tech-stack.md` | 技术选型与理由 |
-| `02-architecture.md` | 分层、依赖方向、启动引导、角色分发、布局插槽 |
-| `03-directory.md` | 目录约定 |
-| `04-coding-standards.md` | 编码规范 |
-| `05-design-system.md` | token、主题、组件分层、状态呈现 |
-| `06-api-contract.md` | 数据层与接口约定 |
-| `07-environments.md` | 环境变量与部署 |
-| `08-template-usage.md` | 本文 |
+| 文档                     | 内容                                         |
+| ------------------------ | -------------------------------------------- |
+| `00-overview.md`         | 定位、边界、不负责什么                       |
+| `01-tech-stack.md`       | 技术选型与理由                               |
+| `02-architecture.md`     | 分层、依赖方向、启动引导、角色分发、布局插槽 |
+| `03-directory.md`        | 目录约定                                     |
+| `04-coding-standards.md` | 编码规范                                     |
+| `05-design-system.md`    | token、主题、组件分层、状态呈现              |
+| `06-api-contract.md`     | 数据层与接口约定                             |
+| `07-environments.md`     | 环境变量与部署                               |
+| `08-template-usage.md`   | 本文                                         |
 
 新人上手按 `00` → `02` → `03` → `04` 的顺序读,其余按需查。

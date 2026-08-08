@@ -100,7 +100,7 @@ features/
 ```
 shared/
   ui/                shadcn 组件源码
-  api/               请求层:fetch 封装、401 拦截、错误约定
+  api/               请求层:axios 封装、401 拦截、错误约定
   hooks/             通用 hooks
   lib/               工具函数
   types/             跨层共用类型

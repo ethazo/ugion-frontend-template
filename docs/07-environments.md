@@ -17,10 +17,10 @@
 
 模板只需要两个:
 
-| 变量 | 用途 | 默认 | 生效阶段 |
-| --- | --- | --- | --- |
-| `VITE_API_PROXY_TARGET` | 开发代理转发到的后端地址 | `http://main.uniplt.tclocal.ugion.com` | 仅开发 |
-| `VITE_BASE_PATH` | 部署子路径,同时喂给 Vite 的 `base` 与 Router 的 `basepath` | `/` | 仅构建 |
+| 变量                    | 用途                                                       | 默认                                   | 生效阶段 |
+| ----------------------- | ---------------------------------------------------------- | -------------------------------------- | -------- |
+| `VITE_API_PROXY_TARGET` | 开发代理转发到的后端地址                                   | `http://main.uniplt.tclocal.ugion.com` | 仅开发   |
+| `VITE_BASE_PATH`        | 部署子路径,同时喂给 Vite 的 `base` 与 Router 的 `basepath` | `/`                                    | 仅构建   |
 
 注意两者都不是运行时的 API 地址。生产环境前后端同域,请求一律用相对路径 `/api/...`,应用代码里不存在"后端地址"这个概念——`VITE_API_PROXY_TARGET` 只被 `vite.config.ts` 读取,不进产物。
 
