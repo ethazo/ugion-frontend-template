@@ -12,7 +12,7 @@ const DEEP_FEATURE_IMPORT = {
 }
 
 export default defineConfig([
-  globalIgnores(['dist', 'src/routeTree.gen.ts']),
+  globalIgnores(['dist', 'src/app/routeTree.gen.ts']),
   {
     files: ['**/*.{ts,tsx}'],
     extends: [

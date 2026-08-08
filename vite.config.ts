@@ -33,6 +33,9 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: env.VITE_API_PROXY_TARGET || DEFAULT_PROXY_TARGET,
           changeOrigin: true,
+          // 后端 Set-Cookie 带 Domain,不剥掉浏览器会因域不匹配丢弃 httpOnly 凭证:
+          // 表现是登录 200 但随后 /auth/me 401。空串移除 Domain,localhost 与局域网 IP 都适用
+          cookieDomainRewrite: '',
         },
       },
     },

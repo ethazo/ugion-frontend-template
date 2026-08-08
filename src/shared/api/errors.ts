@@ -1,50 +1,63 @@
-/**
- * 请求层把所有失败归三类,业务代码只需区分这三类:
- * - auth   HTTP 401,请求层内部跳登录,不给业务代码处理
- * - business  HTTP 200 但 success 为 false,message 可直接展示
- * - system    其余全部:5xx、网络中断、超时、Zod 校验失败,以及 401 之外的 4xx
- */
-export type ApiErrorKind = 'auth' | 'business' | 'system'
+export const GENERIC_MESSAGE = '服务暂时不可用,请稍后重试'
 
-const GENERIC_SYSTEM_MESSAGE = '服务暂时不可用,请稍后重试'
-
-interface ApiErrorOptions {
-  /** 只有 5xx 与网络类错误值得重试,业务错误重试只是重复失败 */
-  isRetryable?: boolean
+interface ApiErrorInit {
+  status: number | null
+  code: number | null
+  message: string
   cause?: unknown
 }
 
+/**
+ * 只携带事实,不携带决定:status 和 code 是后端给的,该不该重试、该不该跳登录、
+ * 文案能不能给用户看,由下面三个判断函数各自推。
+ *
+ * 分类字段(kind 之类)会把这些决定固化在请求层,而请求层看不到调用场景。
+ */
 export class ApiError extends Error {
-  readonly kind: ApiErrorKind
-  readonly isRetryable: boolean
+  /** null 表示压根没拿到响应:网络中断、超时、DNS 失败。 */
+  readonly status: number | null
+  /** null 表示响应体不是后端那套包装:网关错误页、代理超时页,或 schema 不匹配。 */
+  readonly code: number | null
 
-  constructor(kind: ApiErrorKind, message: string, options: ApiErrorOptions = {}) {
-    super(message, options.cause === undefined ? undefined : { cause: options.cause })
+  constructor({ status, code, message, cause }: ApiErrorInit) {
+    super(message, { cause })
     this.name = 'ApiError'
-    this.kind = kind
-    this.isRetryable = options.isRetryable ?? false
+    this.status = status
+    this.code = code
   }
-}
-
-export function authError() {
-  return new ApiError('auth', '登录状态已失效,请重新登录')
-}
-
-export function businessError(message: string) {
-  return new ApiError('business', message)
-}
-
-/** 系统错误不把原始堆栈或技术细节展示给用户,详情只留在 cause 里供控制台排查。 */
-export function systemError(options: ApiErrorOptions = {}) {
-  return new ApiError('system', GENERIC_SYSTEM_MESSAGE, options)
 }
 
 export function isApiError(error: unknown): error is ApiError {
   return error instanceof ApiError
 }
 
-/** 取给用户看的文案:业务错误用后端 message,其余一律通用文案。 */
+export function isAuthError(error: unknown) {
+  return isApiError(error) && error.status === 401
+}
+
+/**
+ * 交给 TanStack Query 的 retry。重试是 Query 的职责,所以判断放在这里读事实,
+ * 而不是让请求层预先在错误上打一个 isRetryable 标记。
+ *
+ * 只重 5xx 与无响应:4xx 重一百次结果一样,200 + success:false 是业务拒绝,
+ * schema 不匹配是前端的问题,都不该重。
+ */
+export function retryApiError(failureCount: number, error: unknown) {
+  if (failureCount >= 1) return false
+  if (!isApiError(error)) return false
+
+  return error.status === null || error.status >= 500
+}
+
+/**
+ * code 不为 null 就说明这句 message 来自后端包装,是写给人看的,直接展示。
+ * 唯一例外是 5xx 与无响应:那时候的 message 常是堆栈或 SQL 片段,属于内部细节。
+ */
 export function errorMessage(error: unknown) {
-  if (isApiError(error)) return error.message
-  return GENERIC_SYSTEM_MESSAGE
+  if (!isApiError(error)) return GENERIC_MESSAGE
+
+  const fromBackend = error.code !== null
+  const serverFault = error.status === null || error.status >= 500
+
+  return fromBackend && !serverFault ? error.message : GENERIC_MESSAGE
 }

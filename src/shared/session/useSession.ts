@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useCallback } from 'react'
 
-import { authKeys, currentUserQueryOptions, logout } from './api'
+import { currentUserQueryOptions, logout, sessionKeys } from './api'
 
 export function useCurrentUser() {
   return useQuery(currentUserQueryOptions)
@@ -15,7 +15,7 @@ export function useRefreshCurrentUser() {
   const queryClient = useQueryClient()
 
   return useCallback(async () => {
-    await queryClient.invalidateQueries({ queryKey: authKeys.all })
+    await queryClient.invalidateQueries({ queryKey: sessionKeys.all })
     return queryClient.fetchQuery(currentUserQueryOptions)
   }, [queryClient])
 }
@@ -25,7 +25,7 @@ export function useLogout() {
 
   return useMutation({
     mutationFn: logout,
-    // 整体清空而不是只删 auth:换账号登录时,上一个用户的列表、详情都不该留在缓存里
+    // 整体清空而不是只删 session:换账号登录时,上一个用户的列表、详情都不该留在缓存里
     onSuccess: () => {
       queryClient.clear()
     },

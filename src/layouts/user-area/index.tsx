@@ -3,19 +3,19 @@ import { Check, LogOut, Monitor, Moon, Sun } from 'lucide-react'
 
 import { type ThemeMode, useTheme } from '@/shared/hooks/useTheme'
 import { fileUrl } from '@/shared/lib/fileUrl'
+import { useCurrentUser, useLogout } from '@/shared/session'
 import { Avatar, AvatarFallback, AvatarImage } from '@/shared/ui/avatar'
 import { Button } from '@/shared/ui/button'
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuGroup,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu'
 import { Skeleton } from '@/shared/ui/skeleton'
-
-import { useCurrentUser, useLogout } from '@/features/auth'
 
 const THEME_OPTIONS: ReadonlyArray<{ mode: ThemeMode; label: string; icon: typeof Sun }> = [
   { mode: 'light', label: '亮色', icon: Sun },
@@ -50,24 +50,28 @@ export function UserArea({ roleLabel }: UserAreaProps) {
       </DropdownMenuTrigger>
 
       <DropdownMenuContent align="end" className="w-52">
-        <DropdownMenuLabel className="flex flex-col gap-0.5">
-          <span className="font-medium">{user.fullName}</span>
-          <span className="text-muted-foreground text-xs font-normal">{roleLabel}</span>
-        </DropdownMenuLabel>
+        <DropdownMenuGroup>
+          <DropdownMenuLabel className="flex flex-col gap-0.5">
+            <span className="font-medium">{user.fullName}</span>
+            <span className="text-muted-foreground text-xs font-normal">{roleLabel}</span>
+          </DropdownMenuLabel>
+        </DropdownMenuGroup>
 
         <DropdownMenuSeparator />
 
-        {THEME_OPTIONS.map((option) => (
-          <DropdownMenuItem
-            key={option.mode}
-            closeOnClick={false}
-            onClick={() => setMode(option.mode)}
-          >
-            <option.icon />
-            {option.label}
-            {option.mode === mode ? <Check className="ml-auto" /> : null}
-          </DropdownMenuItem>
-        ))}
+        <DropdownMenuGroup>
+          {THEME_OPTIONS.map((option) => (
+            <DropdownMenuItem
+              key={option.mode}
+              closeOnClick={false}
+              onClick={() => setMode(option.mode)}
+            >
+              <option.icon />
+              {option.label}
+              {option.mode === mode ? <Check className="ml-auto" /> : null}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuGroup>
 
         <DropdownMenuSeparator />
 

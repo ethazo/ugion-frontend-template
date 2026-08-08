@@ -74,9 +74,9 @@ styles/     全局样式与 token
 
 ## 错误处理
 
-请求层统一处理:401 拦截跳登录、错误归三类(认证失效 / 业务错误 / 系统错误)。组件不写 `try/catch` 包请求,通过 Query 的 `error` 状态处理。
+请求层统一抛 `ApiError`,只带事实(`status` 与后端 `code`),不带预判分类。认证失效、该不该重试、展示什么文案由调用侧从 `status` 推,用 `shared/api/` 导出的 `isAuthError` / `retryApiError` / `errorMessage`。组件不写 `try/catch` 包请求,通过 Query 的 `error` 状态处理。
 
-**HTTP 客户端用 axios,不用 `fetch`。** 业务代码也不直接调 axios,只走 `shared/api/` 导出的 `request` 与 `uploadFile`。
+**HTTP 客户端用 axios,不用 `fetch`。** 业务代码也不直接调 axios,只走 `shared/api/` 导出的 `api`(`get` / `post` / `put` / `delete` / `upload`)。签名与 axios 一致,多出来的只有必填的 `schema`。
 
 每个数据区域都要有 loading 与 error 态,不允许静默失败。用 `shared/ui/` 里的骨架屏、空态、错误态组件,不各自发挥。
 
@@ -106,9 +106,11 @@ styles/     全局样式与 token
 
 响应统一包装 `{ code, message, data, success }`。请求层解包后业务只见 `data`,Zod schema 只描述 `data`。
 
-**业务错误走 HTTP 200 + `success: false`**,不能只看状态码。错误文案直接用 `message`,后端无错误码分段。
+**任何状态码都可能带这层包装,不能只看状态码。** 实测登录失败是 HTTP 400 + `success: false` + `message: "用户名或密码错误"`,也可能出现 HTTP 200 + `success: false`。拦截器两个分支都校验包装,所以业务代码不必关心失败走的是哪条路。后端无错误码分段,`message` 是唯一可展示的信息。
 
-认证失效是 HTTP 401,请求层拦截跳登录。凭证是 httpOnly cookie,`LoginResult` 里的 `token` 与 `sessionId` 一律不用。**401 之外的 4xx 归系统错误**,和 5xx 一样走通用文案,不要因为没单独列出就漏掉分支。重试只给 5xx 与网络错误,1 次。
+认证失效是 HTTP 401。凭证是 httpOnly cookie,`LoginResult` 里的 `token` 与 `sessionId` 一律不用。**4xx 直接展示后端 `message`**——那是写给用户的。**5xx 与无响应走通用文案**,它们的 `message` 往往是堆栈或 SQL 片段,不能甩给用户。重试只给 5xx 与网络错误,1 次。
+
+401 的善后收在 `app/queryClient.ts` 的 `QueryCache` / `MutationCache` `onError` 里(它本来就在 `app/`,不存在 `shared/` 反向依赖装配层的问题),不要在 `shared/api/` 里留注册槽让 `app/` 回填。
 
 请求体统一 JSON(后端也收表单编码,但只用一种)。文件上传除外,用 `FormData`。
 

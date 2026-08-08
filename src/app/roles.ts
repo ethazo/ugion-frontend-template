@@ -1,47 +1,15 @@
-import { BookOpen, GraduationCap, LayoutDashboard, Settings, Users } from 'lucide-react'
+import type { LinkProps } from '@tanstack/react-router'
 
 import type { Role } from '@/shared/types/role'
 
-import type { NavItem } from '@/layouts/nav'
-
-export type LayoutKind = 'top-nav' | 'sidebar'
-
-interface RoleMeta {
-  label: string
-  /** 登录后与访问根路径时的落地页 */
-  landing: NavItem['to']
-  /** layout 是一次选择而非归属:学生和教师同选 top-nav,复用同一个布局组件 */
-  layout: LayoutKind
-  nav: readonly NavItem[]
-}
-
-export const ROLE_META: Record<Role, RoleMeta> = {
-  student: {
-    label: '学生',
-    landing: '/student',
-    layout: 'top-nav',
-    nav: [
-      { label: '首页', to: '/student', icon: LayoutDashboard, exact: true },
-      { label: '我的课程', to: '/student/courses', icon: BookOpen },
-    ],
-  },
-  teacher: {
-    label: '教师',
-    landing: '/teacher',
-    layout: 'top-nav',
-    nav: [
-      { label: '首页', to: '/teacher', icon: LayoutDashboard, exact: true },
-      { label: '我的班级', to: '/teacher/classes', icon: GraduationCap },
-    ],
-  },
-  admin: {
-    label: '管理员',
-    landing: '/admin',
-    layout: 'sidebar',
-    nav: [
-      { label: '概览', to: '/admin', icon: LayoutDashboard, exact: true },
-      { label: '用户管理', to: '/admin/users', icon: Users },
-      { label: '系统设置', to: '/admin/settings', icon: Settings },
-    ],
-  },
+/**
+ * 只登记「拿到角色之后才知道去哪」的信息:守卫纠偏、根路径分流、登录后跳转。
+ *
+ * 布局与导航不在这里。那些只被已经知道自己是谁的代码读取(各角色的 route.lazy.tsx),
+ * 集中登记会让三个角色的外壳互相牵连,打包时也分不开。
+ */
+export const ROLE_LANDING: Record<Role, NonNullable<LinkProps['to']>> = {
+  student: '/student',
+  teacher: '/teacher',
+  admin: '/admin',
 }

@@ -1,5 +1,9 @@
-export { setAuthFailureHandler } from './authFailure'
-export { request } from './client'
-export { ApiError, type ApiErrorKind, errorMessage, isApiError } from './errors'
-export { retryApiError } from './retry'
-export { uploadFile } from './uploadFile'
+export { api, noContentSchema } from './client'
+export {
+  ApiError,
+  errorMessage,
+  GENERIC_MESSAGE,
+  isApiError,
+  isAuthError,
+  retryApiError,
+} from './errors'

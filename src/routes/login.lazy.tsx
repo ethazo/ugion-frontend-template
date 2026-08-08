@@ -1,10 +1,12 @@
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createLazyFileRoute, useNavigate } from '@tanstack/react-router'
 
-import { LoginPage, useRefreshCurrentUser } from '@/features/auth'
+import { useRefreshCurrentUser } from '@/shared/session'
 
-import { ROLE_META } from '@/app/roles'
+import { LoginPage } from '@/features/auth'
 
-export const Route = createFileRoute('/login')({
+import { ROLE_LANDING } from '@/app/roles'
+
+export const Route = createLazyFileRoute('/login')({
   component: LoginRoute,
 })
 
@@ -17,7 +19,7 @@ function LoginRoute() {
       onSuccess={async () => {
         // 登录成功后才知道角色,落地路径由注册表决定,feature 不认识路由表
         const user = await refreshCurrentUser()
-        await navigate({ to: ROLE_META[user.role].landing, replace: true })
+        await navigate({ to: ROLE_LANDING[user.role], replace: true })
       }}
     />
   )
