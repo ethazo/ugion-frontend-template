@@ -1,0 +1,63 @@
+# 技术选型总览
+
+下表是速查,值得展开的决定和被放弃的备选写在后面几节。想换掉某一层之前先读对应说明。
+
+## 选型一览
+
+| 层 | 选择 | 一句话理由 |
+| --- | --- | --- |
+| 框架 | React + TypeScript(strict) | 生态最大,单人维护多项目时查资料成本最低 |
+| 构建 | Vite | 开发反馈快,产物可配置子路径 |
+| 包管理 | pnpm | 严格依赖隔离,避免幽灵依赖在克隆后才暴露 |
+| 路由 | TanStack Router | 类型推导贯通参数与 loader,`beforeLoad` 适合做角色校验 |
+| 样式 | Tailwind CSS v4 | 零运行时,token 以 `@theme` 写在 CSS 里,即原生 CSS 变量 |
+| 组件库 | shadcn/ui(Base UI 基座) | 源码进仓库、可随意改,不受上游版本与设计语言约束 |
+| 表格 | TanStack Table | headless,外观自己定,不带管理系统预设 |
+| 图标 | lucide-react | shadcn 默认配套,本地打包不碰 CDN |
+| 服务端状态 | TanStack Query | 缓存、失效、重试是这类应用的真实问题 |
+| 客户端状态 | Zustand(仅用于外壳级 UI 状态) | 主题、侧栏这类状态不值得上重型方案 |
+| 数据校验 | Zod | 在接口边界做运行时校验,类型才不是自我安慰 |
+| 表单 | React Hook Form + Zod resolver | 生态成熟、资料多,无测试兜底时容错更高 |
+| 日期 | date-fns v4 | react-day-picker 已依赖它,避免仓库里躺两个日期库 |
+| 工程约束 | ESLint(flat config) + Prettier | 约定靠工具强制,写在文档里没人遵守 |
+| 提交钩子 | simple-git-hooks + lint-staged | 单人项目够用,比 husky 少一层目录和安装脚本 |
+
+## 几个值得单独说明的决定
+
+### 不用 Next.js
+
+它会把路由、数据获取和部署形态一起绑定。项目要求内网同域部署、纯静态产物交付给学校,SSR 能力用不上,却要一直背着它的约定。
+
+### 不引入重型 UI 库
+
+Ant Design 这类库会把"管理系统长什么样"直接写进产品外观,而这正是明确要避免的。
+
+shadcn/ui 不是 npm 依赖,组件源码由 CLI 生成到仓库内,因此既省掉从零封装 Dialog、Select、Toast 这些组件的时间,又保留源码级的改动自由。基座选 Base UI 而非 Radix:后者维护节奏放缓,前者由 MUI 团队在积极推进。
+
+默认外观有比较明显的 shadcn 特征,靠调整 token、圆角与间距即可拉开距离——这本来也是每个项目要做的事。
+
+### 表单不跟随 TanStack 成套
+
+Router 与 Table 选 TanStack 各有硬理由(类型推导贯通、headless 无外观预设),表单没有同等级别的理由。TanStack Form 虽已到 v1,但在单人开发、没有测试兜底的条件下,React Hook Form 六七年的生态积累意味着遇到的坑基本都有人写过——这个差距比"心智模型统一"更值钱。
+
+### 不做兼容层
+
+浏览器基线定在现代版本,因此可以直接使用:CSS 嵌套、容器查询、`:has()`、`color-mix()` 与 oklch 色彩空间、View Transitions、原生 `dialog` 与 `popover`。构建目标设为现代 ES,不做降级和 polyfill。
+
+### 状态管理拆两层
+
+大部分被称作"状态管理"的难题本质是异步缓存问题,这部分交给 TanStack Query。真正的客户端状态在这个模板里只有外壳级的少数几项,用 Zustand 足够,不需要 Redux 全家桶。
+
+### 不内置测试框架与 CI
+
+项目规模有限、内网交付、单人维护,一整套测试栈与流水线在这里的维护成本高于收益,因此模板不预置 Vitest、Playwright、MSW 与 GitHub Actions。
+
+保留的是三条本地命令:`typecheck`、`lint`、`format`。它们不属于测试栈,几乎零维护成本,却能挡住最常见的错误——而且由于克隆后各自演进、没有回流通道,基础检查必须在起点就是可用的。
+
+后期某个项目确实需要测试时,单独引入 Vitest + React Testing Library 即可,不必改动模板结构。若后端接口尚未就绪需要 mock,再按需加 MSW。
+
+## 依赖纪律
+
+- 新增依赖前先确认这一层是否已有既有方案
+- 版本固定,不使用开放范围
+- 任何依赖若会在运行时请求外部域名,直接排除
